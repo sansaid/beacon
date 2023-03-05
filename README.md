@@ -1,8 +1,8 @@
 # beacon
 
-> ⚠️ Beacon is not intended for use with production services or services that handle sensitive information! Its purpose is to serve running applications on a budget without having to pay a cloud PaaS. This is only useful for proof of concepts or toy projects.
+> ⚠️ Beacon is not intended for use with production services or services that handle sensitive information! Its purpose is to serve running applications on a budget without having to pay a cloud PaaS an arm and a leg. This is only useful for proof of concepts or toy projects.
 
-Beacon is a service that allows you to use your old machines as a platform. Think of it as a much simpler Docker Swarm and Kubernetes, but with the ability to expose your service to the internet.
+Beacon is a service that allows you to use your old machines as a platform. Think of it as a much simpler Docker Swarm or Kubernetes, but with the ability to expose your service to the internet.
 
 With Beacon, you only need to push your images to a chosen container registry in order for your services to automatically be updated. You can run beacon in two modes:
 
