@@ -17,7 +17,7 @@ When running in this mode, you will manage your services entirely from the mothe
 To operate in this mode, you will need to run one beacon per device. To do so, simply run the following command:
 
 ```sh
-curl -s -L https://summonbeacon.com/install.sh | bash -s --mode fleet
+curl -s -L https://lytbeacon/install.sh | bash -s --mode fleet
 ```
 
 ## Solo mode
@@ -31,7 +31,7 @@ To add services to be managed by beacon, you need to interact with it directly t
 To operate in this mode, you will need to run one beacon per device. To do so, simply run the following command:
 
 ```sh
-curl -s -L https://summonbeacon.com/install.sh | bash -s --mode solo
+curl -s -L https://lytbeacon.com/install.sh | bash -s --mode solo
 ```
 
 # Prerequisites
