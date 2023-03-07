@@ -3,11 +3,20 @@ package cmd
 import (
 	"fmt"
 
+	"beacon/oci"
+
 	"github.com/spf13/cobra"
 )
 
-var flagBeacondMode beacondMode = "solo"
-var allowedBeacondModeValues []string = []string{"solo", "fleet"}
+var flagBeacondMode enumerable = enumerable{
+	allowedValues: []string{"solo", "fleet"},
+	currValue:     "solo",
+}
+
+var flagOCIRuntime enumerable = enumerable{
+	allowedValues: []string{"podman", "docker"},
+	currValue:     "podman",
+}
 
 var beacond = &cobra.Command{
 	Use:   "beacond",
@@ -15,33 +24,37 @@ var beacond = &cobra.Command{
 	Run:   beacondHndlr,
 }
 
-type beacondMode string
-
-func (b *beacondMode) String() string {
-	return string(*b)
+type enumerable struct {
+	allowedValues []string
+	currValue     string
 }
 
-func (b *beacondMode) Set(inputVal string) error {
-	for _, a := range allowedBeacondModeValues {
+func (e *enumerable) String() string {
+	return e.currValue
+}
+
+func (e *enumerable) Set(inputVal string) error {
+	for _, a := range e.allowedValues {
 		if inputVal == a {
-			*b = beacondMode(inputVal)
+			e.currValue = inputVal
 			return nil
 		}
 	}
 
-	return fmt.Errorf("must be one of: %v", allowedBeacondModeValues)
+	return fmt.Errorf("must be one of: %v", e.allowedValues)
 }
 
-func (b *beacondMode) Type() string {
-	return fmt.Sprintf("%v", allowedBeacondModeValues)
+func (e *enumerable) Type() string {
+	return fmt.Sprintf("%v", e.allowedValues)
 }
 
 func init() {
 	beacond.PersistentFlags().VarP(&flagBeacondMode, "mode", "m", "The mode to run beacond in")
+	beacond.PersistentFlags().VarP(&flagOCIRuntime, "runtime", "r", "The OCI runtime to use")
 }
 
 func beacondHndlr(cmd *cobra.Command, args []string) {
-	// todo: checkOCIRuntimExists(flagOCIRuntime)
+	oci.NewOCIClient(oci.OCIRuntime(flagOCIRuntime.currValue))
 	// todo: startWebServer()
 }
 
