@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"beacon/oci"
+	"beacon/beacond/oci"
 
 	"github.com/spf13/cobra"
 )

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"beacon/oci"
+	"beacon/beacond/oci"
 	"fmt"
 	"net/http"
 
