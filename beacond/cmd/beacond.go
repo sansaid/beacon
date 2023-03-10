@@ -18,6 +18,8 @@ var flagOCIRuntime enumerable = enumerable{
 	currValue:     "podman",
 }
 
+var flagBeacondPort int
+
 var beacond = &cobra.Command{
 	Use:   "beacond",
 	Short: "beacond is the daemon component that is responsible for running services on your device",
@@ -51,11 +53,17 @@ func (e *enumerable) Type() string {
 func init() {
 	beacond.PersistentFlags().VarP(&flagBeacondMode, "mode", "m", "The mode to run beacond in")
 	beacond.PersistentFlags().VarP(&flagOCIRuntime, "runtime", "r", "The OCI runtime to use")
+	beacond.PersistentFlags().IntVarP(&flagBeacondPort, "port", "p", 1323, "The port to listen on for commands")
 }
 
 func beacondHndlr(cmd *cobra.Command, args []string) {
-	oci.NewOCIClient(oci.OCIRuntime(flagOCIRuntime.currValue))
-	// todo: startWebServer()
+	client, err := oci.NewOCIClient(oci.OCIRuntime(flagOCIRuntime.currValue))
+
+	if err != nil {
+		panic(err)
+	}
+
+	run(client, flagBeacondPort)
 }
 
 func Execute() error {
