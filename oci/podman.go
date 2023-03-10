@@ -2,7 +2,6 @@ package oci
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/containers/podman/v4/pkg/bindings"
 )
@@ -18,8 +17,7 @@ func NewPodman(ctx context.Context) (OCIRuntimeAPI, error) {
 		return PodmanClient{}, err
 	}
 
-	socket := fmt.Sprintf("%s%s/podman/podman.sock", config.socketRoot, config.socketDir)
-	sockConn, err := bindings.NewConnection(ctx, socket)
+	sockConn, err := bindings.NewConnection(ctx, config.socketPath)
 
 	if err != nil {
 		return PodmanClient{}, err
