@@ -5,7 +5,7 @@ import (
 	"runtime"
 )
 
-func NewPodman() (OCIRuntimeAPI, error) {
+func NewPodman() (OCIRuntime, error) {
 	switch runtime.GOOS {
 	case "windows":
 		return NewWindowsPodman()

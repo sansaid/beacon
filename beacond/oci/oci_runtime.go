@@ -6,25 +6,29 @@ import (
 )
 
 const (
-	Docker OCIRuntime = "docker"
-	Podman OCIRuntime = "podman"
+	Docker OCIRuntimeType = "docker"
+	Podman OCIRuntimeType = "podman"
 )
 
 type cmdRunner func(cmds ...string) ([]byte, error)
 
-type OCIRuntime string
+type OCIRuntimeType string
 
-type OCIRuntimeAPI interface {
-	Images() []string
+type OCIRuntime interface {
 	CheckExists() (bool, error)
+	PullImage(string) error
+	RemoveImage(string) error
+	RunContainer(string) error
+	StoppedContainersUsingImage(string) ([]string, error)
+	StopContainer(string) error
 }
 
-func NewOCIClient(runtime OCIRuntime) (OCIRuntimeAPI, error) {
+func NewOCIClient(runtime OCIRuntimeType) (OCIRuntime, error) {
 	switch runtime {
 	case Podman:
 		return NewPodman()
 	default:
-		return nil, fmt.Errorf("runtime not implemented: %s", runtime)
+		return nil, fmt.Errorf("runtime not supported: %s", runtime)
 	}
 }
 

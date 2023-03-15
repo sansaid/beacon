@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"beacon/beacond/oci"
+	"beacon/beacond/registry"
 
 	"github.com/spf13/cobra"
 )
@@ -16,6 +17,11 @@ var flagBeacondMode enumerable = enumerable{
 var flagOCIRuntime enumerable = enumerable{
 	allowedValues: []string{"podman", "docker"},
 	currValue:     "podman",
+}
+
+var flagRegistry enumerable = enumerable{
+	allowedValues: []string{"docker"},
+	currValue:     "docker",
 }
 
 var flagBeacondPort int
@@ -53,17 +59,26 @@ func (e *enumerable) Type() string {
 func init() {
 	beacond.PersistentFlags().VarP(&flagBeacondMode, "mode", "m", "The mode to run beacond in")
 	beacond.PersistentFlags().VarP(&flagOCIRuntime, "runtime", "r", "The OCI runtime to use")
+	beacond.PersistentFlags().VarP(&flagRegistry, "registry", "c", "The container registry to use")
 	beacond.PersistentFlags().IntVarP(&flagBeacondPort, "port", "p", 1323, "The port to listen on for commands")
 }
 
 func beacondHndlr(cmd *cobra.Command, args []string) {
-	client, err := oci.NewOCIClient(oci.OCIRuntime(flagOCIRuntime.currValue))
+	ociClient, err := oci.NewOCIClient(oci.OCIRuntimeType(flagOCIRuntime.currValue))
 
 	if err != nil {
 		panic(err)
 	}
 
-	run(client, flagBeacondPort)
+	registryClient, err := registry.NewRegistry(registry.RegistryType(flagRegistry.currValue))
+
+	if err != nil {
+		panic(err)
+	}
+
+	beacon := NewBeacon(ociClient, registryClient)
+
+	run(beacon, flagBeacondPort)
 }
 
 func Execute() error {

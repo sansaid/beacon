@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"beacon/beacond/oci"
 	"fmt"
 	"net/http"
 
@@ -13,7 +12,7 @@ type base struct {
 	Error   string `json:"error"`
 }
 
-func run(runtime oci.OCIRuntimeAPI, port int) {
+func run(beacon *Beacon, port int) {
 	e := echo.New()
 
 	e.GET("/health", health)
