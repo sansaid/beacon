@@ -3,6 +3,8 @@ package oci
 import (
 	"context"
 	"os/exec"
+
+	"github.com/labstack/gommon/log"
 )
 
 type PodmanLinuxClient struct {
@@ -19,26 +21,38 @@ func runShell(cmds ...string) ([]byte, error) {
 	return cmd.CombinedOutput()
 }
 
-func (p PodmanLinuxClient) PullImage(digest string) error {
-	panic("not implemented")
+func (p PodmanLinuxClient) PullImage(ref string) error {
+	return pullImage(runShell, ref)
 }
 
-func (p PodmanLinuxClient) RemoveImage(id string) error {
-	// See https://docs.docker.com/engine/reference/commandline/images/#filter
-	// E.G.: podman images --filter=reference='localhost/vsc-sansaid.github.io-*' --filter 'before=localhost/vsc-sansaid.github.io-0bd29f8740a1596f66a2caa9011b13d8-uid' --format json
-	panic("not implemented")
+func (p PodmanLinuxClient) RemoveImage(refPrefix string, olderThanRef string) error {
+	images, err := getImages(runShell, refPrefix, olderThanRef, true)
+
+	if err != nil {
+		return err
+	}
+
+	for _, image := range images {
+		err = removeImage(runShell, image)
+
+		if err != nil {
+			log.Error(err)
+		}
+	}
+
+	return nil
 }
 
-func (p PodmanLinuxClient) RunContainer(id string) error {
-	panic("not implemented")
+func (p PodmanLinuxClient) RunImage(ref string) error {
+	return runImage(runShell, ref)
 }
 
-func (p PodmanLinuxClient) StoppedContainersUsingImage(id string) ([]string, error) {
-	panic("not implemented")
+func (p PodmanLinuxClient) ContainersUsingImage(ref string, statuses []string) ([]string, error) {
+	return containersUsingImage(runShell, ref, statuses)
 }
 
-func (p PodmanLinuxClient) StopContainer(id string) error {
-	panic("not implemented")
+func (p PodmanLinuxClient) StopContainersByImage(ref string) error {
+	return stopContainersByImage(runShell, ref)
 }
 
 func (p PodmanLinuxClient) CheckExists() (bool, error) {

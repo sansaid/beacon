@@ -25,6 +25,7 @@ var flagRegistry enumerable = enumerable{
 }
 
 var flagBeacondPort int
+var flagBeacondCleanOnExit bool
 
 var beacond = &cobra.Command{
 	Use:   "beacond",
@@ -61,6 +62,7 @@ func init() {
 	beacond.PersistentFlags().VarP(&flagOCIRuntime, "runtime", "r", "The OCI runtime to use")
 	beacond.PersistentFlags().VarP(&flagRegistry, "registry", "c", "The container registry to use")
 	beacond.PersistentFlags().IntVarP(&flagBeacondPort, "port", "p", 1323, "The port to listen on for commands")
+	beacond.PersistentFlags().BoolVar(&flagBeacondCleanOnExit, "clean-up", false, "When beacond exits, whether to also stop containers managed by it")
 }
 
 func beacondHndlr(cmd *cobra.Command, args []string) {
@@ -76,7 +78,7 @@ func beacondHndlr(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	beacon := NewBeacon(ociClient, registryClient)
+	beacon := NewBeacon(ociClient, registryClient, flagBeacondCleanOnExit)
 
 	run(beacon, flagBeacondPort)
 }

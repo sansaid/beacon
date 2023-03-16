@@ -17,31 +17,21 @@ type TagFilter interface {
 }
 
 type Tag struct {
-	ID                  int       `json:"id"`
-	Creator             int       `json:"creator"`
-	LastUpdated         time.Time `json:"last_updated"`
-	LastUpdater         int       `json:"last_updater"`
-	LastUpdaterUsername string    `json:"last_updater_username"`
-	Name                string    `json:"name"`
-	Repository          int       `json:"repository"`
-	FullSize            int       `json:"full_size"`
-	V2                  string    `json:"v2"`
-	Status              string    `json:"status"`
-	TagLastPulled       time.Time `json:"tag_last_pulled"`
-	TagLastPushed       time.Time `json:"tag_last_pushed"`
-	Images              []Image   `json:"images"`
+	ID            int       `json:"id"`
+	LastUpdated   time.Time `json:"last_updated"`
+	Name          string    `json:"name"`
+	Repository    int       `json:"repository"`
+	Status        string    `json:"status"`
+	TagLastPulled time.Time `json:"tag_last_pulled"`
+	TagLastPushed time.Time `json:"tag_last_pushed"`
+	Images        []Image   `json:"images"`
 }
 
 type Image struct {
 	Architecture string    `json:"architecture"`
-	Features     string    `json:"features"`
-	Variant      string    `json:"variant"`
 	Digest       string    `json:"digest"`
 	Layers       []Layer   `json:"layers"`
 	OS           string    `json:"os"`
-	OSFeatures   string    `json:"os_features"`
-	OSVersion    string    `json:"os_version"`
-	Size         int       `json:"size"`
 	Status       string    `json:"status"`
 	LastPulled   time.Time `json:"last_pulled"`
 	LastPushed   time.Time `json:"last_pushed"`
