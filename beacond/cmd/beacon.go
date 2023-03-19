@@ -9,6 +9,8 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
+var Beacon beaconManager
+
 const (
 	Probing  ProbeStatus = "probing"
 	Outdated ProbeStatus = "outdated"
@@ -18,7 +20,7 @@ const (
 
 type ProbeStatus string
 
-type Beacon struct {
+type beacon struct {
 	OCIClient      oci.OCIRuntime
 	RegistryClient registry.Registry
 	close          chan struct{}
@@ -41,6 +43,17 @@ type Probe struct {
 	LastUpdated    time.Time
 }
 
+type beaconManager interface {
+	Close()
+	ConfirmClosing()
+	Start()
+	Registry() registry.Registry
+	StartProbe(string, string, time.Duration) error
+	StopProbe(string, time.Duration) error
+	StopProbes(time.Duration) error
+	StopManagedContainers(time.Duration) error
+}
+
 func NewProbe(namespace string, repo string) *Probe {
 	return &Probe{
 		Namespace:      namespace,
@@ -52,26 +65,34 @@ func NewProbe(namespace string, repo string) *Probe {
 	}
 }
 
-func NewBeacon(ociClient oci.OCIRuntime, registryClient registry.Registry, cleanOnExit bool) *Beacon {
-	return &Beacon{
-		OCIClient:      ociClient,
-		RegistryClient: registryClient,
-		CleanOnExit:    cleanOnExit,
-		Probes:         make(map[string]*Probe),
-		close:          make(chan struct{}),
-		confirmClosing: make(chan struct{}),
+func NewBeacon(ociClient oci.OCIRuntime, registryClient registry.Registry, cleanOnExit bool) beaconManager {
+	if Beacon == nil {
+		Beacon = &beacon{
+			OCIClient:      ociClient,
+			RegistryClient: registryClient,
+			CleanOnExit:    cleanOnExit,
+			Probes:         make(map[string]*Probe),
+			close:          make(chan struct{}),
+			confirmClosing: make(chan struct{}),
+		}
 	}
+
+	return Beacon
 }
 
-func (b *Beacon) Close() {
+func (b *beacon) Registry() registry.Registry {
+	return b.RegistryClient
+}
+
+func (b *beacon) Close() {
 	b.close <- struct{}{}
 }
 
-func (b *Beacon) ConfirmClosing() {
+func (b *beacon) ConfirmClosing() {
 	b.confirmClosing <- struct{}{}
 }
 
-func (b *Beacon) Start() {
+func (b *beacon) Start() {
 	defer b.ConfirmClosing()
 
 	select {
@@ -127,7 +148,7 @@ func (b *Beacon) Start() {
 	}
 }
 
-func (b *Beacon) RunProbe(namespace string, repo string, delay time.Duration) error {
+func (b *beacon) StartProbe(namespace string, repo string, delay time.Duration) error {
 	probeRef := fmt.Sprintf("%s/%s", namespace, repo)
 	b.Probes[probeRef] = NewProbe(namespace, repo)
 
@@ -136,7 +157,7 @@ func (b *Beacon) RunProbe(namespace string, repo string, delay time.Duration) er
 	return nil
 }
 
-func (b *Beacon) StopProbes(delay time.Duration) error {
+func (b *beacon) StopProbes(delay time.Duration) error {
 	select {
 	case <-time.Tick(delay):
 		return fmt.Errorf("timed out stopping probes")
@@ -151,7 +172,7 @@ func (b *Beacon) StopProbes(delay time.Duration) error {
 	}
 }
 
-func (b *Beacon) StopManagedContainers(delay time.Duration) error {
+func (b *beacon) StopManagedContainers(delay time.Duration) error {
 	select {
 	case <-time.Tick(delay):
 		return fmt.Errorf("timed out stopping managed containers")
@@ -169,7 +190,7 @@ func (b *Beacon) StopManagedContainers(delay time.Duration) error {
 	}
 }
 
-func (b *Beacon) StopProbe(probeRef string, delay time.Duration) error {
+func (b *beacon) StopProbe(probeRef string, delay time.Duration) error {
 	b.Probes[probeRef].Close()
 	<-b.Probes[probeRef].confirmClosing
 	delete(b.Probes, probeRef)

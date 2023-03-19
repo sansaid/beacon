@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo"
 )
@@ -12,15 +13,16 @@ type response struct {
 	Error   string `json:"error"`
 }
 
-func run(beacon *Beacon, port int) {
-	defer beacon.Close()
+func run(port int) {
+	defer Beacon.Close()
 
 	e := echo.New()
 
 	e.GET("/health", health)
 	e.PUT("/probe", probe)
 
-	go beacon.Start()
+	// TODO: use an error group so we can exit when Beacon errors
+	go Beacon.Start()
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
@@ -40,12 +42,22 @@ func probe(c echo.Context) error {
 	repo := c.QueryParam("repo")
 
 	if namespace == "" || repo == "" {
-		r.Error = "Expect namepsace and repo query params to be provided"
+		r.Error = "Expect namespace and repo query params to be provided"
 
 		return c.JSON(http.StatusBadRequest, r)
 	}
 
-	// TODO: add some awareness to the global beacon instance
-	r.Message = "Probe created for "
-	return c.JSON(http.StatusOK, r)
+	if sc, err := Beacon.Registry().TestRepo(namespace, repo); err != nil {
+		r.Message = fmt.Sprintf("Could not fetch repo %s in namespace %s", repo, namespace)
+		r.Error = err.Error()
+
+		return c.JSON(sc, r)
+	}
+
+	Beacon.StartProbe(namespace, repo, time.Second*20)
+
+	r.Message = fmt.Sprintf("Probe successfully created for repo %s at namespace %s", repo, namespace)
+	return c.JSON(http.StatusCreated, r)
 }
+
+// CONT: test starting a probe

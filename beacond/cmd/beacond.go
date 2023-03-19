@@ -78,9 +78,9 @@ func beacondHndlr(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	beacon := NewBeacon(ociClient, registryClient, flagBeacondCleanOnExit)
+	_ = NewBeacon(ociClient, registryClient, flagBeacondCleanOnExit)
 
-	run(beacon, flagBeacondPort)
+	run(flagBeacondPort)
 }
 
 func Execute() error {
