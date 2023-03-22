@@ -11,6 +11,7 @@ type RegistryType string
 type Registry interface {
 	LatestImageDigest(string, string) (string, error)
 	TestRepo(string, string) (int, error)
+	URL() string
 }
 
 func NewRegistry(registryType RegistryType) (Registry, error) {

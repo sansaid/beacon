@@ -53,6 +53,10 @@ func NewDockerRegistry(hubURL string) (Registry, error) {
 	}, nil
 }
 
+func (d *DockerRegistry) URL() string {
+	return d.HubURL
+}
+
 func (d *DockerRegistry) LatestImageDigest(namespace string, repo string) (string, error) {
 	latestTag, err := d.latestTag(namespace, repo)
 
@@ -128,7 +132,6 @@ func (d *DockerRegistry) TestRepo(namespace string, repo string) (int, error) {
 	return http.StatusOK, nil
 }
 
-// TODO: use one API call to images API instead: https://docs.docker.com/docker-hub/api/latest/#tag/images/operation/GetNamespacesRepositoriesImages
 func (t Tag) latestImageDigest() (Image, error) {
 	if len(t.Images) == 0 {
 		return Image{}, fmt.Errorf("no images found for tag %s", t.Name)

@@ -21,6 +21,10 @@ func runPowershell(cmds ...string) ([]byte, error) {
 	return cmd.CombinedOutput()
 }
 
+func (p PodmanWindowsClient) Type() string {
+	return string(Podman)
+}
+
 func (p PodmanWindowsClient) PullImage(ref string) error {
 	return pullImage(runPowershell, ref)
 }

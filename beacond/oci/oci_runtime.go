@@ -14,6 +14,7 @@ type cmdRunner func(cmds ...string) ([]byte, error)
 type OCIRuntimeType string
 
 type OCIRuntime interface {
+	Type() string
 	CheckExists() (bool, error)
 	PullImage(string) error
 	RemoveImage(string, string) error

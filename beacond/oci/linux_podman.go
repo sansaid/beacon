@@ -21,6 +21,10 @@ func runShell(cmds ...string) ([]byte, error) {
 	return cmd.CombinedOutput()
 }
 
+func (p PodmanLinuxClient) Type() string {
+	return string(Podman)
+}
+
 func (p PodmanLinuxClient) PullImage(ref string) error {
 	return pullImage(runShell, ref)
 }

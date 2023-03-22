@@ -42,7 +42,7 @@ To run beacon, you need to have either `podman` or `docker` installed.
 
 ## Beacon
 
-`beacon` is a perpetual service running on your device that manages which services are running on your device, which enpodints are exposed and which image is mapped to the service in the container registry. You can only have one `beacon` per device.
+`beacon` is a perpetual service running on your device that manages which services are running, which endpoints are exposed and which image is mapped to the service in the container registry. You can only have one `beacon` per device.
 
 ## Mothership
 
