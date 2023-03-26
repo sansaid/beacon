@@ -3,6 +3,7 @@ module beacon
 go 1.20
 
 require (
+	github.com/golang/mock v1.6.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.4.0
 	github.com/spf13/cobra v1.6.1
