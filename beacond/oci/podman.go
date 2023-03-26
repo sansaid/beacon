@@ -1,6 +1,7 @@
 package oci
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"runtime"
@@ -9,19 +10,28 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
+type PodmanClient struct {
+	ctx    context.Context
+	runner Runner
+}
+
 func NewPodman() (OCIRuntime, error) {
 	switch runtime.GOOS {
 	case "windows":
-		return NewWindowsPodman()
+		return PodmanClient{ctx: context.Background(), runner: PowershellRunner{}}, nil
 	case "linux":
-		return NewLinuxPodman()
+		return PodmanClient{ctx: context.Background(), runner: PosixRunner{}}, nil
 	default:
 		return nil, fmt.Errorf("unsupported OS: %s", runtime.GOOS)
 	}
 }
 
-func checkExists(runner cmdRunner) (bool, error) {
-	output, err := runner("podman", "--version")
+func (p PodmanClient) Type() string {
+	return string(Podman)
+}
+
+func (p PodmanClient) CheckExists() (bool, error) {
+	output, err := p.runner.run("podman", "--version")
 
 	if err != nil {
 		return false, fmt.Errorf("error checking podman exists. Output was: %s; Error was: %s", output, err)
@@ -34,8 +44,8 @@ func checkExists(runner cmdRunner) (bool, error) {
 	return false, fmt.Errorf("could not check if podman is running. It either errored unexpectedly or the output was not recognised. Output was: %s; Error was: %s", string(output), err.Error())
 }
 
-func runImage(runner cmdRunner, imageRef string) error {
-	output, err := runner("podman", "run", imageRef)
+func (p PodmanClient) RunImage(imageRef string) error {
+	output, err := p.runner.run("podman", "run", imageRef)
 
 	if err != nil {
 		return fmt.Errorf("error checking running podman image. Output was: %s; Error was: %s", output, err)
@@ -44,8 +54,8 @@ func runImage(runner cmdRunner, imageRef string) error {
 	return nil
 }
 
-func pullImage(runner cmdRunner, imageRef string) error {
-	output, err := runner("podman", "pull", imageRef)
+func (p PodmanClient) PullImage(imageRef string) error {
+	output, err := p.runner.run("podman", "pull", imageRef)
 
 	if err != nil {
 		return fmt.Errorf("error pulling podman image %s. Output was: %s; Error was: %s", imageRef, output, err)
@@ -54,25 +64,36 @@ func pullImage(runner cmdRunner, imageRef string) error {
 	return nil
 }
 
-func removeImage(runner cmdRunner, imageRef string) error {
-	output, err := runner("podman", "rm", "image", imageRef)
+func (p PodmanClient) RemoveImages(refPrefix string, olderThanRef string) error {
+	args := []string{"podman", "rm"}
+	images, err := p.GetImages(refPrefix, olderThanRef, true)
 
 	if err != nil {
-		return fmt.Errorf("error removing podman image %s. Output was: %s; Error was: %s", imageRef, output, err)
+		return err
+	}
+
+	args = append(args, images...)
+
+	// TODO: might be better to run the rm for each image individually so that we don't let the
+	// failure of one image cause the all other image removals to fail
+	output, err := p.runner.run(args...)
+
+	if err != nil {
+		return fmt.Errorf("error removing podman images. Output was: %s; Error was: %s", output, err)
 	}
 
 	return nil
 }
 
-func stopContainersByImage(runner cmdRunner, imageRef string) error {
-	containers, err := containersUsingImage(runner, imageRef, []string{"running"})
+func (p PodmanClient) StopContainersByImage(imageRef string) error {
+	containers, err := p.ContainersUsingImage(imageRef, []string{"running"})
 
 	if err != nil {
 		return err
 	}
 
 	for _, container := range containers {
-		err = stopContainer(runShell, container)
+		err = p.StopContainer(container)
 
 		if err != nil {
 			log.Error(err.Error())
@@ -83,8 +104,8 @@ func stopContainersByImage(runner cmdRunner, imageRef string) error {
 	return nil
 }
 
-func stopContainer(runner cmdRunner, containerID string) error {
-	output, err := runner("podman", "stop", containerID)
+func (p PodmanClient) StopContainer(containerID string) error {
+	output, err := p.runner.run("podman", "stop", containerID)
 
 	if err != nil {
 		return fmt.Errorf("error stopping container %s. Output was: %s; Error was: %s", containerID, output, err)
@@ -94,7 +115,7 @@ func stopContainer(runner cmdRunner, containerID string) error {
 }
 
 // See applicable containers: https://docs.docker.com/engine/reference/commandline/ps/#filter
-func containersUsingImage(runner cmdRunner, imageRef string, statuses []string) ([]string, error) {
+func (p PodmanClient) ContainersUsingImage(imageRef string, statuses []string) ([]string, error) {
 	//  podman ps --filter=ancestor='docker.io/library/httpd@sha256:e4498843f8684e957e3068546ed930b30d43180e2e8c2579d39d637bd2fe79de' --format json
 	args := []string{"podman", "ps", "--format", "json"}
 	args = append(args, fmt.Sprintf("--filter=ancestor='%s'", imageRef))
@@ -103,7 +124,7 @@ func containersUsingImage(runner cmdRunner, imageRef string, statuses []string) 
 		args = append(args, fmt.Sprintf("--filter=status=%s", status))
 	}
 
-	output, err := runner(args...)
+	output, err := p.runner.run(args...)
 
 	if err != nil {
 		return []string{}, fmt.Errorf("error getting containers associated with image %s. Output was: %s; Error was: %s", imageRef, output, err)
@@ -128,7 +149,7 @@ func containersUsingImage(runner cmdRunner, imageRef string, statuses []string) 
 	return containerIDs, nil
 }
 
-func getImages(runner cmdRunner, refPrefix string, olderThanImageRef string, dangling bool) ([]string, error) {
+func (p PodmanClient) GetImages(refPrefix string, olderThanImageRef string, dangling bool) ([]string, error) {
 	// See https://docs.docker.com/engine/reference/commandline/images/#filter
 	// E.G.: podman images --filter=reference='docker.io/library/httpd' --filter 'before=docker.io/library/httpd@sha256:e4498843f8684e957e3068546ed930b30d43180e2e8c2579d39d637bd2fe79de' --format json
 	args := []string{"podman", "images", "--format", "json",
@@ -137,7 +158,7 @@ func getImages(runner cmdRunner, refPrefix string, olderThanImageRef string, dan
 		fmt.Sprintf("--filter=dangling=%t", dangling),
 	}
 
-	output, err := runner(args...)
+	output, err := p.runner.run(args...)
 
 	if err != nil {
 		return []string{}, fmt.Errorf("error getting images associated with prefix %s. Output was: %s; Error was: %s", refPrefix, output, err)
