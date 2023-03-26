@@ -12,7 +12,7 @@ const (
 type OCIRuntimeType string
 
 type OCIRuntime interface {
-	Type() string
+	Type() OCIRuntimeType
 	CheckExists() (bool, error)
 	PullImage(string) error
 	RemoveImages(string, string) error

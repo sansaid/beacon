@@ -26,8 +26,8 @@ func NewPodman() (OCIRuntime, error) {
 	}
 }
 
-func (p PodmanClient) Type() string {
-	return string(Podman)
+func (p PodmanClient) Type() OCIRuntimeType {
+	return Podman
 }
 
 func (p PodmanClient) CheckExists() (bool, error) {
@@ -41,14 +41,14 @@ func (p PodmanClient) CheckExists() (bool, error) {
 		return true, nil
 	}
 
-	return false, fmt.Errorf("could not check if podman is running. It either errored unexpectedly or the output was not recognised. Output was: %s; Error was: %s", string(output), err.Error())
+	return false, fmt.Errorf("could not check if podman is running. The output was not recognised. Output was: %s", string(output))
 }
 
 func (p PodmanClient) RunImage(imageRef string) error {
 	output, err := p.runner.run("podman", "run", imageRef)
 
 	if err != nil {
-		return fmt.Errorf("error checking running podman image. Output was: %s; Error was: %s", output, err)
+		return fmt.Errorf("error running podman image %s. Output was: %s; Error was: %s", imageRef, output, err)
 	}
 
 	return nil
@@ -75,7 +75,7 @@ func (p PodmanClient) RemoveImages(refPrefix string, olderThanRef string) error 
 	args = append(args, images...)
 
 	// TODO: might be better to run the rm for each image individually so that we don't let the
-	// failure of one image cause the all other image removals to fail
+	// failure of one image cause all the other image removals to fail
 	output, err := p.runner.run(args...)
 
 	if err != nil {
@@ -121,7 +121,7 @@ func (p PodmanClient) ContainersUsingImage(imageRef string, statuses []string) (
 	args = append(args, fmt.Sprintf("--filter=ancestor='%s'", imageRef))
 
 	for _, status := range statuses {
-		args = append(args, fmt.Sprintf("--filter=status=%s", status))
+		args = append(args, fmt.Sprintf("--filter=status='%s'", status))
 	}
 
 	output, err := p.runner.run(args...)
@@ -143,7 +143,9 @@ func (p PodmanClient) ContainersUsingImage(imageRef string, statuses []string) (
 	var containerIDs []string
 
 	for _, container := range containers {
-		containerIDs = append(containerIDs, container.ID)
+		if container.ID != "" {
+			containerIDs = append(containerIDs, container.ID)
+		}
 	}
 
 	return containerIDs, nil
@@ -151,7 +153,7 @@ func (p PodmanClient) ContainersUsingImage(imageRef string, statuses []string) (
 
 func (p PodmanClient) GetImages(refPrefix string, olderThanImageRef string, dangling bool) ([]string, error) {
 	// See https://docs.docker.com/engine/reference/commandline/images/#filter
-	// E.G.: podman images --filter=reference='docker.io/library/httpd' --filter 'before=docker.io/library/httpd@sha256:e4498843f8684e957e3068546ed930b30d43180e2e8c2579d39d637bd2fe79de' --format json
+	// EG: podman images --filter=reference='docker.io/library/httpd' --filter 'before=docker.io/library/httpd@sha256:e4498843f8684e957e3068546ed930b30d43180e2e8c2579d39d637bd2fe79de' --format json
 	args := []string{"podman", "images", "--format", "json",
 		fmt.Sprintf("--filter=reference='%s'", refPrefix),
 		fmt.Sprintf("--filter=before='%s'", olderThanImageRef),
@@ -177,7 +179,9 @@ func (p PodmanClient) GetImages(refPrefix string, olderThanImageRef string, dang
 	var imageIDs []string
 
 	for _, image := range images {
-		imageIDs = append(imageIDs, image.ID)
+		if image.ID != "" {
+			imageIDs = append(imageIDs, image.ID)
+		}
 	}
 
 	return imageIDs, nil

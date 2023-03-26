@@ -116,7 +116,7 @@ func getBeaconDetails(c echo.Context) error {
 
 	r.Registry = Beacon.Registry().URL()
 	r.Probes = Beacon.ListProbes()
-	r.Runtime = Beacon.Runtime().Type()
+	r.Runtime = string(Beacon.Runtime().Type())
 
 	return c.JSON(http.StatusConflict, r)
 }
