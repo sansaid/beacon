@@ -39,7 +39,6 @@ type Probe struct {
 	Namespace      string
 	Repo           string
 	Status         ProbeStatus
-	RunCommand     []string
 	CurrentDigest  string
 	LatestDigest   string
 	LastChecked    time.Time
@@ -108,7 +107,6 @@ func (b *beacon) Start() error {
 	for {
 		select {
 		case <-b.close:
-			fmt.Print("HEY3")
 			if b.CleanOnExit {
 				err := b.StopManagedContainers(30 * time.Second)
 
@@ -124,8 +122,8 @@ func (b *beacon) Start() error {
 				if probe.Status == Outdated {
 					imageRef := fmt.Sprintf("%s/%s@%s", probe.Namespace, probe.Repo, probe.LatestDigest)
 
-					// Check that a container for this image isn't already running - this can happen if Beacon unexpectedly exits
-					// and leaves containers it manages running
+					// Check that a container for this image isn't already running - this can happen if the OCI runtime fails
+					// to clear the containers requested by Beacon on exit
 					runningContainers, err := b.OCIClient.ContainersUsingImage(imageRef, []string{"running"})
 
 					if err != nil {

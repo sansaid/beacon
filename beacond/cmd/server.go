@@ -8,9 +8,14 @@ import (
 	"github.com/labstack/echo"
 )
 
-type response struct {
+type baseResponse struct {
 	Message string `json:"message"`
 	Error   string `json:"error"`
+}
+
+type createProbeRequestBody struct {
+	Cmd     string            `json:"command"`
+	EnvVars map[string]string `json:"environmentVariables"`
 }
 
 func run(port int) {
@@ -33,7 +38,7 @@ func run(port int) {
 }
 
 func health(c echo.Context) error {
-	var r response
+	var r baseResponse
 
 	r.Message = "beacond is happily running :)"
 
@@ -41,7 +46,7 @@ func health(c echo.Context) error {
 }
 
 func deleteProbe(c echo.Context) error {
-	var r response
+	var r baseResponse
 
 	namespace := c.QueryParam("namespace")
 	repo := c.QueryParam("repo")
@@ -66,12 +71,23 @@ func deleteProbe(c echo.Context) error {
 }
 
 func createProbe(c echo.Context) error {
-	var r response
+	var r baseResponse
+	var body createProbeRequestBody
+
+	err := c.Bind(body)
+
+	if err != nil {
+		r.Message = "Error parsing request body"
+		r.Error = err.Error()
+
+		return c.JSON(http.StatusBadRequest, r)
+	}
 
 	namespace := c.QueryParam("namespace")
 	repo := c.QueryParam("repo")
 
 	if namespace == "" || repo == "" {
+		r.Message = "Missing query parameters"
 		r.Error = "Expect namespace and repo query params to be provided"
 
 		return c.JSON(http.StatusBadRequest, r)
@@ -84,7 +100,8 @@ func createProbe(c echo.Context) error {
 		return c.JSON(sc, r)
 	}
 
-	err := Beacon.StartProbe(namespace, repo, time.Second*20)
+	// TODO: support running probes with an exec command and environment variables
+	err = Beacon.StartProbe(namespace, repo, time.Second*20)
 
 	if _, ok := err.(BeaconErrorProbeAlreadyExists); ok {
 		r.Error = err.Error()
