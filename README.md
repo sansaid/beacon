@@ -6,20 +6,6 @@ Beacon is a service that allows you to use your old machines as a platform. Thin
 
 With Beacon, you only need to push your images to a chosen container registry in order for your services to automatically be updated. You can run beacon in two modes:
 
-## Fleet mode
-
-In **fleet mode**, beacon operates as one of several beacons reporting to the _mothership_. This allows your mothership to manage which services are running where depending on the availability of resources reported by the beacons. You will need to connect your beacon to your account at `summonbeacon.com` in order to operate in this mode.
-
-When running in this mode, you will manage your services entirely from the mothership, with a one time setup needed to register your device to the mothership.
-
-### Setup
-
-To operate in this mode, you will need to run one beacon per device. To do so, simply run the following command:
-
-```sh
-curl -s -L https://lytbeacon/install.sh | bash -s --mode fleet
-```
-
 ## Solo mode
 
 In **solo mode**, the beacon operates independently and does not delegate its management to the mothership.
@@ -31,12 +17,43 @@ To add services to be managed by beacon, you need to interact with it directly t
 To operate in this mode, you will need to run one beacon per device. To do so, simply run the following command:
 
 ```sh
+# Under construction - lytbeacon.com is not operational yet
 curl -s -L https://lytbeacon.com/install.sh | bash -s --mode solo
+```
+
+
+## Fleet mode
+
+> 🚧 **UNDER CONSTRUCTION** - this mode is not available yet. Please check again later!
+
+In **fleet mode**, beacon operates as one of several beacons reporting to the _mothership_. This allows your mothership to manage which services are running where depending on the availability of resources reported by the beacons. You will need to connect your beacon to your account at `lytbeacon.com` in order to operate in this mode.
+
+When running in this mode, you will manage your services entirely from the mothership, with a one time setup needed to register your device to the mothership.
+
+### Setup
+
+To operate in this mode, you will need to run one beacon per device. To do so, simply run the following command:
+
+```sh
+# Under construction - lytbeacon.com is not operational yet
+curl -s -L https://lytbeacon.com/install.sh | bash -s --mode fleet
 ```
 
 # Prerequisites
 
 To run beacon, you need to have either `podman` or `docker` installed.
+
+# Operating Principles
+
+To use Beacon, there are a few operating principles that should be assumed
+
+* Beacon is only useful with toy projects or proof of concepts that do not rely on high availability, scale or security
+* For now, Beacon only works really well with worker type services (for example, Telegram bots, Discord bots, a report maker, etc.) - that is until we can make endpoint management available
+* Beacon is very, very simple - its sole job is to make sure a container is running with the latest version currently available at an image repo
+* Treat the image manifest of your Beacon service as the only input that defines your service; in other words:
+  * Treat the `EXEC` field in your image manifest as the value you ultimately want to run in your environment (refer to the **Beacon is very, very simple** principle)
+  * Use the `ENV` declarative in your image manifest to define non-sensitive environment variables you want to run your environment
+  * For sensitive values, you should retrieve these values at runtime by calling a local or remote secret store (in future iterations of Beacon, we plan to provide this secret store by default)
 
 # Concepts
 
@@ -46,7 +63,9 @@ To run beacon, you need to have either `podman` or `docker` installed.
 
 ## Mothership
 
-The `mothership` is the manager for all your beacons if you're running in fleet mode. It's only accessible through `summonbeacon.com`. You can do all the things you can do in solo mode with the mothership, except it's applied across all of your beacons. If a beacon is down, the mothership needs to decide how to rebuild the service 
+> 🚧 **UNDER CONSTRUCTION** - the mothership is still being built. Please check again later!
+
+The `mothership` is the manager for all your beacons if you're running in fleet mode. It's only accessible through `lytbeacon.com`. You can do all the things you can do in solo mode with the mothership, except it's applied across all of your beacons. If a beacon is down, the mothership needs to decide how to rebuild the service 
 
 ## Service
 
