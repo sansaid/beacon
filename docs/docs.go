@@ -27,7 +27,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/server.baseResponse"
+                            "$ref": "#/definitions/server.BeaconDescribeResponse"
                         }
                     }
                 }
@@ -44,7 +44,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/server.baseResponse"
+                            "$ref": "#/definitions/server.BaseResponse"
                         }
                     }
                 }
@@ -77,31 +77,31 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/server.baseResponse"
+                            "$ref": "#/definitions/server.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/server.baseResponse"
+                            "$ref": "#/definitions/server.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/server.baseResponse"
+                            "$ref": "#/definitions/server.BaseResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/server.baseResponse"
+                            "$ref": "#/definitions/server.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/server.baseResponse"
+                            "$ref": "#/definitions/server.BaseResponse"
                         }
                     }
                 }
@@ -132,25 +132,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/server.baseResponse"
+                            "$ref": "#/definitions/server.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/server.baseResponse"
+                            "$ref": "#/definitions/server.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/server.baseResponse"
+                            "$ref": "#/definitions/server.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/server.baseResponse"
+                            "$ref": "#/definitions/server.BaseResponse"
                         }
                     }
                 }
@@ -167,7 +167,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/server.baseResponse"
+                            "$ref": "#/definitions/server.ListProbesResponse"
                         }
                     }
                 }
@@ -175,7 +175,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "server.baseResponse": {
+        "server.BaseResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -183,6 +183,34 @@ const docTemplate = `{
                 },
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "server.BeaconDescribeResponse": {
+            "type": "object",
+            "properties": {
+                "probes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "registry": {
+                    "type": "string"
+                },
+                "runtime": {
+                    "type": "string"
+                }
+            }
+        },
+        "server.ListProbesResponse": {
+            "type": "object",
+            "properties": {
+                "probes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         }

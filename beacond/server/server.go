@@ -40,10 +40,10 @@ func Run(ociClient oci.OCIRuntime, registryClient registry.Registry, port int, c
 //	@Summary		Health check
 //	@Description	reports the health of the beacond server
 //	@Produce		json
-//	@Success		200	{object}	baseResponse
+//	@Success		200	{object}	BaseResponse
 //	@Router			/health [get]
 func health(c echo.Context) error {
-	var r baseResponse
+	var r BaseResponse
 
 	r.Message = "beacond is happily running :)"
 
@@ -60,13 +60,13 @@ func health(c echo.Context) error {
 //	@Produce		json
 //	@Param			namespace	query		string	true	"the repo namespace the probe should check for image updates"
 //	@Param			repo		query		string	true	"the repo name which the probe should check for image updates"
-//	@Success		201			{object}	baseResponse
-//	@Failure		404			{object}	baseResponse
-//	@Failure		400			{object}	baseResponse
-//	@Failure		500			{object}	baseResponse
+//	@Success		201			{object}	BaseResponse
+//	@Failure		404			{object}	BaseResponse
+//	@Failure		400			{object}	BaseResponse
+//	@Failure		500			{object}	BaseResponse
 //	@Router			/probe [delete]
 func deleteProbe(c echo.Context) error {
-	var r baseResponse
+	var r BaseResponse
 
 	namespace := c.QueryParam("namespace")
 	repo := c.QueryParam("repo")
@@ -107,14 +107,14 @@ func deleteProbe(c echo.Context) error {
 //	@Produce		json
 //	@Param			namespace	query		string	true	"the repo namespace the probe should check for image updates"
 //	@Param			repo		query		string	true	"the repo name which the probe should check for image updates"
-//	@Success		201			{object}	baseResponse
-//	@Failure		409			{object}	baseResponse
-//	@Failure		404			{object}	baseResponse
-//	@Failure		400			{object}	baseResponse
-//	@Failure		500			{object}	baseResponse
+//	@Success		201			{object}	BaseResponse
+//	@Failure		409			{object}	BaseResponse
+//	@Failure		404			{object}	BaseResponse
+//	@Failure		400			{object}	BaseResponse
+//	@Failure		500			{object}	BaseResponse
 //	@Router			/probe [post]
 func createProbe(c echo.Context) error {
-	var r baseResponse
+	var r BaseResponse
 
 	namespace := c.QueryParam("namespace")
 	repo := c.QueryParam("repo")
@@ -171,12 +171,10 @@ func createProbe(c echo.Context) error {
 //	@Summary		Lists all probes
 //	@Description	lists probes that are running for beacond
 //	@Produce		json
-//	@Success		200	{object}	baseResponse
+//	@Success		200	{object}	ListProbesResponse
 //	@Router			/probes [get]
 func listProbes(c echo.Context) error {
-	var r struct {
-		Probes []string `json:"probes"`
-	}
+	var r ListProbesResponse
 
 	r.Probes = Beacon.ListProbes()
 
@@ -191,14 +189,10 @@ func listProbes(c echo.Context) error {
 //	@Summary		Get beacon details
 //	@Description	describes the current status of beacond
 //	@Produce		json
-//	@Success		200	{object}	baseResponse
+//	@Success		200	{object}	BeaconDescribeResponse
 //	@Router			/beacon [get]
 func getBeaconDetails(c echo.Context) error {
-	var r struct {
-		Registry string   `json:"registry"`
-		Probes   []string `json:"probes"`
-		Runtime  string   `json:"runtime"`
-	}
+	var r BeaconDescribeResponse
 
 	r.Registry = Beacon.Registry().URL()
 	r.Probes = Beacon.ListProbes()

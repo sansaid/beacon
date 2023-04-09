@@ -1,10 +1,28 @@
 definitions:
-  server.baseResponse:
+  server.BaseResponse:
     properties:
       error:
         type: string
       message:
         type: string
+    type: object
+  server.BeaconDescribeResponse:
+    properties:
+      probes:
+        items:
+          type: string
+        type: array
+      registry:
+        type: string
+      runtime:
+        type: string
+    type: object
+  server.ListProbesResponse:
+    properties:
+      probes:
+        items:
+          type: string
+        type: array
     type: object
 info:
   contact: {}
@@ -18,7 +36,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/server.baseResponse'
+            $ref: '#/definitions/server.BeaconDescribeResponse'
       summary: Get beacon details
   /health:
     get:
@@ -29,7 +47,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/server.baseResponse'
+            $ref: '#/definitions/server.BaseResponse'
       summary: Health check
   /probe:
     delete:
@@ -52,19 +70,19 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/server.baseResponse'
+            $ref: '#/definitions/server.BaseResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.baseResponse'
+            $ref: '#/definitions/server.BaseResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/server.baseResponse'
+            $ref: '#/definitions/server.BaseResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.baseResponse'
+            $ref: '#/definitions/server.BaseResponse'
       summary: Delete a probe
     post:
       description: creates a probe for the namespace and repo provided in the URL
@@ -86,23 +104,23 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/server.baseResponse'
+            $ref: '#/definitions/server.BaseResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.baseResponse'
+            $ref: '#/definitions/server.BaseResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/server.baseResponse'
+            $ref: '#/definitions/server.BaseResponse'
         "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/server.baseResponse'
+            $ref: '#/definitions/server.BaseResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.baseResponse'
+            $ref: '#/definitions/server.BaseResponse'
       summary: Create a probe
   /probes:
     get:
@@ -113,6 +131,6 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/server.baseResponse'
+            $ref: '#/definitions/server.ListProbesResponse'
       summary: Lists all probes
 swagger: "2.0"
