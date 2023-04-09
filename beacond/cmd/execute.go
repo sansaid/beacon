@@ -5,6 +5,7 @@ import (
 
 	"beacon/beacond/oci"
 	"beacon/beacond/registry"
+	"beacon/beacond/server"
 
 	"github.com/spf13/cobra"
 )
@@ -78,9 +79,7 @@ func beacondHndlr(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	_ = NewBeacon(ociClient, registryClient, flagBeacondCleanOnExit)
-
-	run(flagBeacondPort)
+	server.Run(ociClient, registryClient, flagBeacondPort, flagBeacondCleanOnExit)
 }
 
 func Execute() error {

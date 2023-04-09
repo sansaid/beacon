@@ -1,4 +1,4 @@
-package cmd
+package server
 
 import (
 	"fmt"
@@ -6,6 +6,9 @@ import (
 )
 
 func withTimeout(f func() error, timeout time.Duration, errorMsg string) error {
+	ticker := time.NewTicker(timeout)
+	defer ticker.Reset(timeout)
+
 	var finished chan struct{}
 
 	var err error
@@ -19,7 +22,7 @@ func withTimeout(f func() error, timeout time.Duration, errorMsg string) error {
 
 	for {
 		select {
-		case <-time.Tick(timeout):
+		case <-ticker.C:
 			return fmt.Errorf(errorMsg)
 		case <-finished:
 			return err

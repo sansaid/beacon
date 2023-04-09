@@ -1,6 +1,8 @@
-package cmd
+package server
 
 import (
+	"beacon/beacond/oci"
+	"beacon/beacond/registry"
 	"fmt"
 	"net/http"
 	"time"
@@ -18,7 +20,8 @@ type createProbeRequestBody struct {
 	EnvVars map[string]string `json:"environmentVariables"`
 }
 
-func run(port int) {
+func Run(ociClient oci.OCIRuntime, registryClient registry.Registry, port int, cleanOnExit bool) {
+	NewBeacon(ociClient, registryClient, cleanOnExit)
 	defer Beacon.Close()
 
 	e := echo.New()
