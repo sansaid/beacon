@@ -1,0 +1,118 @@
+definitions:
+  server.baseResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /beacon:
+    get:
+      description: describes the current status of beacond
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.baseResponse'
+      summary: Get beacon details
+  /health:
+    get:
+      description: reports the health of the beacond server
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.baseResponse'
+      summary: Health check
+  /probe:
+    delete:
+      description: deletes the probe for the namespace and repo provided in the URL
+        query parameters
+      parameters:
+      - description: the repo namespace the probe should check for image updates
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: the repo name which the probe should check for image updates
+        in: query
+        name: repo
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/server.baseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.baseResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.baseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.baseResponse'
+      summary: Delete a probe
+    post:
+      description: creates a probe for the namespace and repo provided in the URL
+        query parameters
+      parameters:
+      - description: the repo namespace the probe should check for image updates
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: the repo name which the probe should check for image updates
+        in: query
+        name: repo
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/server.baseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.baseResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.baseResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.baseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.baseResponse'
+      summary: Create a probe
+  /probes:
+    get:
+      description: lists probes that are running for beacond
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.baseResponse'
+      summary: Lists all probes
+swagger: "2.0"

@@ -92,7 +92,7 @@ func filterLatestTag(tags []Tag) Tag {
 	return currentTag
 }
 
-func (d *DockerRegistry) TestRepo(namespace string, repo string) (int, error) {
+func (d *DockerRegistry) TestRepo(namespace string, repo string) error {
 	// Pinging tags URL since that does not need authentication to access
 	manifestPath := fmt.Sprintf("v2/namespaces/%s/repositories/%s/tags", namespace, repo)
 	endpoint := fmt.Sprintf("%s/%s", d.HubURL, manifestPath)
@@ -105,7 +105,7 @@ func (d *DockerRegistry) TestRepo(namespace string, repo string) (int, error) {
 	resp, err := http.Get(endpoint)
 
 	if err != nil {
-		return http.StatusInternalServerError, fmt.Errorf("error getting images summary from %s: %s", endpoint, err)
+		return GeneralServerError(fmt.Errorf("error getting images summary from %s: %s", endpoint, err))
 	}
 
 	defer resp.Body.Close()
@@ -113,23 +113,23 @@ func (d *DockerRegistry) TestRepo(namespace string, repo string) (int, error) {
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
-		return http.StatusInternalServerError, fmt.Errorf("error reading response reading images summary: %s", err)
+		return GeneralServerError(fmt.Errorf("error reading response reading images summary: %s", err))
 	}
 
 	if err := json.Unmarshal(body, &checkResponse); err != nil {
-		return http.StatusInternalServerError, fmt.Errorf("error unmarshalling JSON response while reading images summary: %s", err)
+		return GeneralServerError(fmt.Errorf("error unmarshalling JSON response while reading images summary: %s", err))
 	}
 
 	switch sc := resp.StatusCode; {
 	case sc == http.StatusNotFound:
-		return sc, fmt.Errorf("repo %s under namespace %s does not exist: %s", repo, namespace, checkResponse.Message)
+		return NotFoundError(fmt.Errorf("repo %s under namespace %s does not exist: %s", repo, namespace, checkResponse.Message))
 	case sc >= 400 && sc <= 499:
-		return sc, fmt.Errorf("client error checking namespace %s and repo %s: %s", namespace, repo, checkResponse.Message)
+		return GeneralClientError(fmt.Errorf("client error checking namespace %s and repo %s: %s", namespace, repo, checkResponse.Message))
 	case sc >= 500 && sc <= 599:
-		return sc, fmt.Errorf("server error checking namespace %s and repo %s: %s", namespace, repo, checkResponse.Message)
+		return GeneralServerError(fmt.Errorf("server error checking namespace %s and repo %s: %s", namespace, repo, checkResponse.Message))
 	}
 
-	return http.StatusOK, nil
+	return nil
 }
 
 func (t Tag) latestImageDigest() (Image, error) {
