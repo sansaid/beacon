@@ -8,7 +8,7 @@ With Beacon, you only need to push your images to a chosen container registry in
 
 ## Solo mode
 
-In **solo mode**, the beacon operates independently and does not delegate its management to the mothership.
+In **solo mode**, the beacon operates independently and does not delegate its management to the mothership. In other words, updates to the services that you're running must happen manually and by you.
 
 To add services to be managed by beacon, you need to interact with it directly through the CLI on the device it's running on. If you have other beacons running, the other beacons will not be aware that you have changed anything on the current beacon.
 
@@ -65,7 +65,7 @@ To use Beacon, there are a few operating principles that should be assumed
 
 > 🚧 **UNDER CONSTRUCTION** - the mothership is still being built. Please check again later!
 
-The `mothership` is the manager for all your beacons if you're running in fleet mode. It's only accessible through `lytbeacon.com`. You can do all the things you can do in solo mode with the mothership, except it's applied across all of your beacons. If a beacon is down, the mothership needs to decide how to rebuild the service 
+The `mothership` is the manager for all your beacons if you're running in fleet mode. It's only accessible through `lytbeacon.com`. You can do all the things you can do in solo mode with the mothership, except it's applied across all of your beacons. If a beacon is down, the mothership needs to decide how to rebuild the service.
 
 ## Service
 
