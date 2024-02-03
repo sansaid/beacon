@@ -7,9 +7,14 @@ import (
 	"net/http"
 	"time"
 
+	"beacon/beacond/models"
+
 	"github.com/labstack/echo"
 )
 
+// @Title				beacond API
+// @Version			0.1
+// @Description	API for beacond server
 func Run(ociClient oci.OCIRuntime, registryClient registry.Registry, port int, cleanOnExit bool) {
 	NewBeacon(ociClient, registryClient, cleanOnExit)
 	defer Beacon.Close()
@@ -34,16 +39,13 @@ func Run(ociClient oci.OCIRuntime, registryClient registry.Registry, port int, c
 
 // health handles the GET /health method for beacond
 //
-//	@Title			beacond
-//	@Version		1.0
-//
 //	@Summary		Health check
 //	@Description	reports the health of the beacond server
 //	@Produce		json
 //	@Success		200	{object}	BaseResponse
 //	@Router			/health [get]
 func health(c echo.Context) error {
-	var r BaseResponse
+	var r models.ServerBaseResponse
 
 	r.Message = "beacond is happily running :)"
 
@@ -51,9 +53,6 @@ func health(c echo.Context) error {
 }
 
 // deleteProbe handles the DELETE /probe method for beacond
-//
-//	@Title			beacond
-//	@Version		1.0
 //
 //	@Summary		Delete a probe
 //	@Description	deletes the probe for the namespace and repo provided in the URL query parameters
@@ -66,7 +65,7 @@ func health(c echo.Context) error {
 //	@Failure		500			{object}	BaseResponse
 //	@Router			/probe [delete]
 func deleteProbe(c echo.Context) error {
-	var r BaseResponse
+	var r models.ServerBaseResponse
 
 	namespace := c.QueryParam("namespace")
 	repo := c.QueryParam("repo")
@@ -99,9 +98,6 @@ func deleteProbe(c echo.Context) error {
 
 // createProbe handles the POST /probe method for beacond
 //
-//	@Title			beacond
-//	@Version		1.0
-//
 //	@Summary		Create a probe
 //	@Description	creates a probe for the namespace and repo provided in the URL query parameters
 //	@Produce		json
@@ -114,7 +110,7 @@ func deleteProbe(c echo.Context) error {
 //	@Failure		500			{object}	BaseResponse
 //	@Router			/probe [post]
 func createProbe(c echo.Context) error {
-	var r BaseResponse
+	var r models.ServerBaseResponse
 
 	namespace := c.QueryParam("namespace")
 	repo := c.QueryParam("repo")
@@ -165,16 +161,13 @@ func createProbe(c echo.Context) error {
 
 // listProbes handles the GET /probes method for beacond
 //
-//	@Title			beacond
-//	@Version		1.0
-//
 //	@Summary		Lists all probes
 //	@Description	lists probes that are running for beacond
 //	@Produce		json
 //	@Success		200	{object}	ListProbesResponse
 //	@Router			/probes [get]
 func listProbes(c echo.Context) error {
-	var r ListProbesResponse
+	var r models.ServerListProbesResponse
 
 	r.Probes = Beacon.ListProbes()
 
@@ -183,16 +176,13 @@ func listProbes(c echo.Context) error {
 
 // getBeaconDetails handles the GET /beacon method for beacond
 //
-//	@Title			beacond
-//	@Version		1.0
-//
 //	@Summary		Get beacon details
 //	@Description	describes the current status of beacond
 //	@Produce		json
 //	@Success		200	{object}	BeaconDescribeResponse
 //	@Router			/beacon [get]
 func getBeaconDetails(c echo.Context) error {
-	var r BeaconDescribeResponse
+	var r models.ServerBeaconDescribeResponse
 
 	r.Registry = Beacon.Registry().URL()
 	r.Probes = Beacon.ListProbes()
