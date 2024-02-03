@@ -1,7 +1,10 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "API for beacond server",
+        "title": "beacond API",
+        "contact": {},
+        "version": "0.1"
     },
     "paths": {
         "/beacon": {

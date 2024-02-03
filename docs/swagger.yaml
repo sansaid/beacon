@@ -26,6 +26,9 @@ definitions:
     type: object
 info:
   contact: {}
+  description: API for beacond server
+  title: beacond API
+  version: "0.1"
 paths:
   /beacon:
     get:
